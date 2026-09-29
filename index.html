@@ -599,7 +599,7 @@
         <p>Open this page in <strong>Safari</strong>, tap <strong>Share</strong> (the square with an upward arrow), choose <strong>Add to Home Screen</strong>, then tap <strong>Add</strong>.</p>
       </div>
 
-      <div class="version-footer"><span data-app-name>JBP Discipline App</span> · <span data-app-version>v0.96c Alpha</span> <img class="personal-logo" src="jb-productions-logo.png" alt="JB Productions logo"></div>
+      <div class="version-footer"><span data-app-name>JBP Discipline App</span> · <span data-app-version>v0.96d Alpha</span> <img class="personal-logo" src="jb-productions-logo.png" alt="JB Productions logo"></div>
     </div>
   </section>
 
@@ -607,7 +607,7 @@
     <img src="icon-192.png" alt="JBP Discipline App logo">
 
     <div class="header-title">
-      <h1><span data-app-name>JBP Discipline App</span> <span class="header-version"><span data-app-version>v0.96c Alpha</span> <img class="personal-logo" src="jb-productions-logo.png" alt="JB Productions logo"></span></h1>
+      <h1><span data-app-name>JBP Discipline App</span> <span class="header-version"><span data-app-version>v0.96d Alpha</span> <img class="personal-logo" src="jb-productions-logo.png" alt="JB Productions logo"></span></h1>
       <p data-app-motto>Making school admin easier</p>
     </div>
 
@@ -633,7 +633,7 @@
       <div id="loginNotice"></div>
 
       <label for="email">Email address</label>
-      <input id="email" type="email" autocomplete="username" placeholder="name@example.com">
+      <input id="email" type="text" autocapitalize="none" spellcheck="false" autocomplete="username" placeholder="name@example.com">
 
       <label for="pin">PIN</label>
       <input id="pin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="PIN">
@@ -649,7 +649,7 @@
         Only use “Keep me signed in” on a private device that you control.
       </p>
 
-      <div class="version-footer"><span data-app-name>JBP Discipline App</span> · <span data-app-version>v0.96c Alpha</span> <img class="personal-logo" src="jb-productions-logo.png" alt="JB Productions logo"></div>
+      <div class="version-footer"><span data-app-name>JBP Discipline App</span> · <span data-app-version>v0.96d Alpha</span> <img class="personal-logo" src="jb-productions-logo.png" alt="JB Productions logo"></div>
     </section>
 
     <section id="changePinView" class="card login-card hidden">
@@ -669,7 +669,7 @@
       <p class="muted" style="font-size:12px;margin-top:14px">
         Do not share your personal PIN. If you close the app now, you will be asked to complete this step next time.
       </p>
-      <div class="version-footer"><span data-app-name>JBP Discipline App</span> · <span data-app-version>v0.96c Alpha</span> <img class="personal-logo" src="jb-productions-logo.png" alt="JB Productions logo"></div>
+      <div class="version-footer"><span data-app-name>JBP Discipline App</span> · <span data-app-version>v0.96d Alpha</span> <img class="personal-logo" src="jb-productions-logo.png" alt="JB Productions logo"></div>
     </section>
 
     <section id="appView" class="hidden"></section>
@@ -679,7 +679,7 @@
 <script>
   const APP_CONFIG = window.JBP_APP_CONFIG || {};
   const APP_NAME = APP_CONFIG.appName || 'JBP Discipline App';
-  const APP_VERSION = APP_CONFIG.version || 'v0.96c Alpha';
+  const APP_VERSION = APP_CONFIG.version || 'v0.96d Alpha';
   const APP_MOTTO = APP_CONFIG.motto || 'Making school admin easier';
 
   let sessionToken = '';
@@ -746,6 +746,13 @@
   const REMOVE_INCIDENT_ACTION = 'Remove Incident — Entered in Error';
 
   const VERSION_HISTORY = [
+    {
+      key:'v096d', version:'v0.96d Alpha', summary:'Common-offence selection and sign-in field fixes',
+      changes:[
+        'Updated common-offence buttons and the complete offence list to use the same selection handler.',
+        'Improved sign-in and user-account field validation while retaining the Email address label.'
+      ]
+    },
     {
       key:'v096c', version:'v0.96c Alpha', summary:'Official JBP master app and isolated client-ready foundation',
       changes:[
@@ -3188,7 +3195,7 @@
         <label for="adminEmail">Email address</label>
         <input
           id="adminEmail"
-          type="email"
+          type="text" autocapitalize="none" spellcheck="false"
           value="${escapeAttr(user.email || '')}"
           placeholder="name@example.com"
           ${isNew ? '' : 'readonly'}
@@ -3979,11 +3986,25 @@
     }).join('<br>');
     const fullOffenceList = offences.map(function(offence) {
       return `
-        <button class="list-btn" data-offence-search="${escapeAttr((offence.code + ' ' + offence.description).toLowerCase())}" onclick="chooseOffence('${jsString(offence.code)}')">
+        <button class="list-btn" data-offence-search="${escapeAttr((offence.code + ' ' + offence.description).toLowerCase())}" data-offence-code="${escapeAttr(offence.code)}">
           <strong>${escapeHtml(offence.code)} · ${escapeHtml(offence.description)}</strong><br>
           <span class="points-badge" style="margin-top:6px">${Number(offence.points)} pts</span>
         </button>
       `;
+    }).join('');
+    // The shortcuts must come from the active rule list.  Do not show a
+    // hard-coded button that points at a rule which a future client has
+    // removed or renamed.
+    const shortcutDefinitions = [
+      { code: '1-07', label: 'Homework Not Done' },
+      { code: '1-02', label: 'Incorrect Uniform' },
+      { code: '1-01', label: 'Late for Class' },
+      { code: '2-04', label: 'Disrupting Behaviour' }
+    ];
+    const shortcutButtons = shortcutDefinitions.map(function(shortcut) {
+      const offence = offences.find(function(rule) { return String(rule.code) === shortcut.code; });
+      if (!offence) return '';
+      return `<button class="offence-shortcut" type="button" data-offence-code="${escapeAttr(offence.code)}">${escapeHtml(shortcut.label)}<small>${escapeHtml(offence.code)} · ${Number(offence.points)} points</small></button>`;
     }).join('');
 
     const periods = [
@@ -4056,12 +4077,8 @@
           <h2 id="offencePickerTitle">Select Offence</h2>
           <p class="muted">Choose a common offence, or open the complete list.</p>
 
-          <div class="offence-shortcuts">
-            <button class="offence-shortcut" onclick="chooseOffence('1-07')">Homework Not Done<small>1-07 · 5 points</small></button>
-            <button class="offence-shortcut" onclick="chooseOffence('1-02')">Incorrect Uniform<small>1-02 · 5 points</small></button>
-            <button class="offence-shortcut" onclick="chooseOffence('1-01')">Late for Class<small>1-01 · 5 points</small></button>
-            <button class="offence-shortcut" onclick="chooseOffence('2-04')">Disrupting Behaviour<small>2-04 · 10 points</small></button>
-          </div>
+          <div class="offence-shortcuts">${shortcutButtons}</div>
+          <div id="offencePickerNotice" role="alert"></div>
 
           <button class="btn block secondary" onclick="showOtherOffences()">Other Offence</button>
 
@@ -4076,6 +4093,13 @@
       </div>
     `);
 
+    // Bind directly after rendering: text, points and button taps use one path.
+    document.querySelectorAll('#offencePicker [data-offence-code]').forEach(function(button) {
+      button.addEventListener('click', function(event) {
+        event.preventDefault();
+        chooseOffence(button.dataset.offenceCode);
+      });
+    });
     updateOffencePreview();
   }
 
@@ -4105,8 +4129,12 @@
   }
 
   function chooseOffence(code) {
-    const rule = offences.find(function(offence) { return offence.code === code; });
-    if (!rule) return;
+    const rule = offences.find(function(offence) { return String(offence.code).trim().toUpperCase() === String(code).trim().toUpperCase(); });
+    if (!rule) {
+      const notice = document.getElementById('offencePickerNotice');
+      if (notice) notice.innerHTML = '<div class="notice error">That offence is not available in this school\'s active offence list. Please use Other Offence or ask an administrator to check the Offences sheet.</div>';
+      return;
+    }
     selectedOffenceCode = rule.code;
     closeOffencePicker();
     updateOffencePreview();

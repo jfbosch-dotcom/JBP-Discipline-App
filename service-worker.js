@@ -1,4 +1,4 @@
-const CACHE_NAME = 'jbp-discipline-v096c-alpha';
+const CACHE_NAME = 'jbp-discipline-v096d-alpha';
 
 const STATIC_FILES = [
   './',
