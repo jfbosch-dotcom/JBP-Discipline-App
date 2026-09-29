@@ -599,7 +599,7 @@
         <p>Open this page in <strong>Safari</strong>, tap <strong>Share</strong> (the square with an upward arrow), choose <strong>Add to Home Screen</strong>, then tap <strong>Add</strong>.</p>
       </div>
 
-      <div class="version-footer"><span data-app-name>JBP Discipline App</span> · <span data-app-version>v0.96dii Alpha</span> <img class="personal-logo" src="jb-productions-logo.png" alt="JB Productions logo"></div>
+      <div class="version-footer"><span data-app-name>JBP Discipline App</span> · <span data-app-version>v0.96diii Alpha</span> <img class="personal-logo" src="jb-productions-logo.png" alt="JB Productions logo"></div>
     </div>
   </section>
 
@@ -607,7 +607,7 @@
     <img src="icon-192.png" alt="JBP Discipline App logo">
 
     <div class="header-title">
-      <h1><span data-app-name>JBP Discipline App</span> <span class="header-version"><span data-app-version>v0.96dii Alpha</span> <img class="personal-logo" src="jb-productions-logo.png" alt="JB Productions logo"></span></h1>
+      <h1><span data-app-name>JBP Discipline App</span> <span class="header-version"><span data-app-version>v0.96diii Alpha</span> <img class="personal-logo" src="jb-productions-logo.png" alt="JB Productions logo"></span></h1>
       <p data-app-motto>Making school admin easier</p>
     </div>
 
@@ -649,7 +649,7 @@
         Only use “Keep me signed in” on a private device that you control.
       </p>
 
-      <div class="version-footer"><span data-app-name>JBP Discipline App</span> · <span data-app-version>v0.96dii Alpha</span> <img class="personal-logo" src="jb-productions-logo.png" alt="JB Productions logo"></div>
+      <div class="version-footer"><span data-app-name>JBP Discipline App</span> · <span data-app-version>v0.96diii Alpha</span> <img class="personal-logo" src="jb-productions-logo.png" alt="JB Productions logo"></div>
     </section>
 
     <section id="changePinView" class="card login-card hidden">
@@ -669,7 +669,7 @@
       <p class="muted" style="font-size:12px;margin-top:14px">
         Do not share your personal PIN. If you close the app now, you will be asked to complete this step next time.
       </p>
-      <div class="version-footer"><span data-app-name>JBP Discipline App</span> · <span data-app-version>v0.96dii Alpha</span> <img class="personal-logo" src="jb-productions-logo.png" alt="JB Productions logo"></div>
+      <div class="version-footer"><span data-app-name>JBP Discipline App</span> · <span data-app-version>v0.96diii Alpha</span> <img class="personal-logo" src="jb-productions-logo.png" alt="JB Productions logo"></div>
     </section>
 
     <section id="appView" class="hidden"></section>
@@ -679,7 +679,7 @@
 <script>
   const APP_CONFIG = window.JBP_APP_CONFIG || {};
   const APP_NAME = APP_CONFIG.appName || 'JBP Discipline App';
-  const APP_VERSION = APP_CONFIG.version || 'v0.96dii Alpha';
+  const APP_VERSION = APP_CONFIG.version || 'v0.96diii Alpha';
   const APP_MOTTO = APP_CONFIG.motto || 'Making school admin easier';
 
   let sessionToken = '';
@@ -746,6 +746,10 @@
   const REMOVE_INCIDENT_ACTION = 'Remove Incident — Entered in Error';
 
   const VERSION_HISTORY = [
+    {
+      key:'v096diii', version:'v0.96diii Alpha', summary:'Faster HOD and register-class summaries',
+      changes:['Calculate policy thresholds once per dashboard request, reducing Apps Script cache calls for each learner.']
+    },
     {
       key:'v096dii', version:'v0.96dii Alpha', summary:'Restored four common-offence buttons',
       changes:[

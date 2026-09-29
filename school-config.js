@@ -5,7 +5,7 @@ window.JBP_APP_CONFIG = Object.freeze({
   appName: 'JBP Discipline App',
   schoolName: 'JBP Discipline App',
   motto: 'Making school admin easier',
-  version: 'v0.96dii Alpha',
+  version: 'v0.96diii Alpha',
   appOrigin: 'https://jbp-discipline.jbproducts.co.za',
   apiBaseURL: 'https://api-jbp-discipline.jbproducts.co.za',
   fallbackApiBaseURL: '',
