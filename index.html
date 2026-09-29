@@ -599,7 +599,7 @@
         <p>Open this page in <strong>Safari</strong>, tap <strong>Share</strong> (the square with an upward arrow), choose <strong>Add to Home Screen</strong>, then tap <strong>Add</strong>.</p>
       </div>
 
-      <div class="version-footer"><span data-app-name>JBP Discipline App</span> · <span data-app-version>v0.96d Alpha</span> <img class="personal-logo" src="jb-productions-logo.png" alt="JB Productions logo"></div>
+      <div class="version-footer"><span data-app-name>JBP Discipline App</span> · <span data-app-version>v0.96dii Alpha</span> <img class="personal-logo" src="jb-productions-logo.png" alt="JB Productions logo"></div>
     </div>
   </section>
 
@@ -607,7 +607,7 @@
     <img src="icon-192.png" alt="JBP Discipline App logo">
 
     <div class="header-title">
-      <h1><span data-app-name>JBP Discipline App</span> <span class="header-version"><span data-app-version>v0.96d Alpha</span> <img class="personal-logo" src="jb-productions-logo.png" alt="JB Productions logo"></span></h1>
+      <h1><span data-app-name>JBP Discipline App</span> <span class="header-version"><span data-app-version>v0.96dii Alpha</span> <img class="personal-logo" src="jb-productions-logo.png" alt="JB Productions logo"></span></h1>
       <p data-app-motto>Making school admin easier</p>
     </div>
 
@@ -649,7 +649,7 @@
         Only use “Keep me signed in” on a private device that you control.
       </p>
 
-      <div class="version-footer"><span data-app-name>JBP Discipline App</span> · <span data-app-version>v0.96d Alpha</span> <img class="personal-logo" src="jb-productions-logo.png" alt="JB Productions logo"></div>
+      <div class="version-footer"><span data-app-name>JBP Discipline App</span> · <span data-app-version>v0.96dii Alpha</span> <img class="personal-logo" src="jb-productions-logo.png" alt="JB Productions logo"></div>
     </section>
 
     <section id="changePinView" class="card login-card hidden">
@@ -669,7 +669,7 @@
       <p class="muted" style="font-size:12px;margin-top:14px">
         Do not share your personal PIN. If you close the app now, you will be asked to complete this step next time.
       </p>
-      <div class="version-footer"><span data-app-name>JBP Discipline App</span> · <span data-app-version>v0.96d Alpha</span> <img class="personal-logo" src="jb-productions-logo.png" alt="JB Productions logo"></div>
+      <div class="version-footer"><span data-app-name>JBP Discipline App</span> · <span data-app-version>v0.96dii Alpha</span> <img class="personal-logo" src="jb-productions-logo.png" alt="JB Productions logo"></div>
     </section>
 
     <section id="appView" class="hidden"></section>
@@ -679,7 +679,7 @@
 <script>
   const APP_CONFIG = window.JBP_APP_CONFIG || {};
   const APP_NAME = APP_CONFIG.appName || 'JBP Discipline App';
-  const APP_VERSION = APP_CONFIG.version || 'v0.96d Alpha';
+  const APP_VERSION = APP_CONFIG.version || 'v0.96dii Alpha';
   const APP_MOTTO = APP_CONFIG.motto || 'Making school admin easier';
 
   let sessionToken = '';
@@ -746,6 +746,14 @@
   const REMOVE_INCIDENT_ACTION = 'Remove Incident — Entered in Error';
 
   const VERSION_HISTORY = [
+    {
+      key:'v096dii', version:'v0.96dii Alpha', summary:'Restored four common-offence buttons',
+      changes:[
+        'Always displays Homework Not Done, Incorrect Uniform, Late for Class and Disrupting Behaviour.',
+        'Matches common offences by code or an unambiguous description and uses the active database point value.',
+        'Shows a helpful message and the full list if a common offence cannot be matched.'
+      ]
+    },
     {
       key:'v096d', version:'v0.96d Alpha', summary:'Common-offence selection and sign-in field fixes',
       changes:[
@@ -3972,6 +3980,39 @@
      INCIDENT FORM
   ========================================================= */
 
+  const COMMON_OFFENCES = [
+    {code:'1-07', label:'Homework Not Done', pattern:/homework\s+(?:not\s+done|incomplete|not\s+completed)|(?:missing|incomplete)\s+homework/i},
+    {code:'1-02', label:'Incorrect Uniform', pattern:/incorrect\s+uniform|school\s+uniform.*(?:nails|hair|jewellery)|uniform\s+(?:violation|not\s+correct)/i},
+    {code:'1-01', label:'Late for Class', pattern:/late\s+(?:for|to)\s+(?:class|school)|failing\s+to\s+attend\s+class\s+or\s+school\s+on\s+time|latecoming|tardiness/i},
+    {code:'2-04', label:'Disrupting Behaviour', pattern:/disrupting\s+behavio[u]?r|disruption\s+of\s+class\s+discipline|disruptive\s+behavio[u]?r/i}
+  ];
+
+  function commonOffenceCode(value) {
+    return String(value || '').trim().toUpperCase().replace(/[–—−]/g, '-').replace(/\s+/g, '').replace(/^(\d+)-(\d)$/, '$1-0$2');
+  }
+
+  function resolveCommonOffence(shortcut) {
+    const byCode = offences.filter(function(rule) {
+      return commonOffenceCode(rule.code) === commonOffenceCode(shortcut.code);
+    });
+    if (byCode.length === 1) return byCode[0];
+    if (byCode.length > 1) return null;
+    const byDescription = offences.filter(function(rule) {
+      return shortcut.pattern.test(String(rule.description || ''));
+    });
+    return byDescription.length === 1 ? byDescription[0] : null;
+  }
+
+  function chooseCommonOffence(index) {
+    const shortcut = COMMON_OFFENCES[Number(index)];
+    if (!shortcut) return;
+    const rule = resolveCommonOffence(shortcut);
+    if (rule) { chooseOffence(rule.code); return; }
+    const notice = document.getElementById('offencePickerNotice');
+    if (notice) notice.innerHTML = '<div class="notice error">' + escapeHtml(shortcut.label) + ' could not be matched to one active offence. Please choose it from Other Offence, or ask the administrator to check the Offences sheet.</div>';
+    showOtherOffences();
+  }
+
   function showIncidentForm() {
     setScreenContext(
       'incident-form',
@@ -3992,19 +4033,10 @@
         </button>
       `;
     }).join('');
-    // The shortcuts must come from the active rule list.  Do not show a
-    // hard-coded button that points at a rule which a future client has
-    // removed or renamed.
-    const shortcutDefinitions = [
-      { code: '1-07', label: 'Homework Not Done' },
-      { code: '1-02', label: 'Incorrect Uniform' },
-      { code: '1-01', label: 'Late for Class' },
-      { code: '2-04', label: 'Disrupting Behaviour' }
-    ];
-    const shortcutButtons = shortcutDefinitions.map(function(shortcut) {
-      const offence = offences.find(function(rule) { return String(rule.code) === shortcut.code; });
-      if (!offence) return '';
-      return `<button class="offence-shortcut" type="button" data-offence-code="${escapeAttr(offence.code)}">${escapeHtml(shortcut.label)}<small>${escapeHtml(offence.code)} · ${Number(offence.points)} points</small></button>`;
+    const shortcutButtons = COMMON_OFFENCES.map(function(shortcut, index) {
+      const offence = resolveCommonOffence(shortcut);
+      const detail = offence ? escapeHtml(offence.code) + ' · ' + Number(offence.points) + ' points' : 'Choose offence';
+      return `<button class="offence-shortcut" type="button" data-common-offence="${index}">${escapeHtml(shortcut.label)}<small>${detail}</small></button>`;
     }).join('');
 
     const periods = [
@@ -4093,7 +4125,13 @@
       </div>
     `);
 
-    // Bind directly after rendering: text, points and button taps use one path.
+    document.querySelectorAll('#offencePicker [data-common-offence]').forEach(function(button) {
+      button.addEventListener('click', function(event) {
+        event.preventDefault();
+        chooseCommonOffence(button.dataset.commonOffence);
+      });
+    });
+    // Full-list buttons share the final selection handler with shortcuts.
     document.querySelectorAll('#offencePicker [data-offence-code]').forEach(function(button) {
       button.addEventListener('click', function(event) {
         event.preventDefault();
